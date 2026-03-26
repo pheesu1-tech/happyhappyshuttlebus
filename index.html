@@ -1,14 +1,12 @@
-html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>셔틀 픽업 관리</title>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
     const firebaseConfig = {
       apiKey: "AIzaSyCRehoBmgqhtgKf_ypyastE7Lh3U1iKAus",
       authDomain: "happyhappyshuttle.firebaseapp.com",
@@ -18,293 +16,118 @@ html<!DOCTYPE html>
       messagingSenderId: "504947163720",
       appId: "1:504947163720:web:bd3e705dc7a404440d4e7d"
     };
-
     try {
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
-      window._db = db;
-      window._ref = ref;
-      window._set = set;
-      window._onValue = onValue;
-      window._fbReady = true;
+      window._db=db; window._ref=ref; window._set=set; window._onValue=onValue;
+      window._fbReady=true;
       window.dispatchEvent(new Event('firebase-ready'));
     } catch(e) {
-      window._fbReady = false;
+      window._fbReady=false;
       window.dispatchEvent(new Event('firebase-ready'));
     }
   </script>
-
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-      background: #f0f4f8;
-      color: #2d3748;
-      min-height: 100vh;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 22px 20px 18px;
-      text-align: center;
-      position: relative;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #2d3748; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 22px 20px 18px; text-align: center; position: relative; }
     .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
     .header p { font-size: 12px; opacity: 0.85; }
-
-    .lock-btn {
-      position: absolute;
-      top: 18px; right: 16px;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 10px;
-      padding: 7px 11px;
-      color: white;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 5px;
-      transition: background 0.15s;
-    }
+    .lock-btn { position: absolute; top: 18px; right: 16px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; padding: 7px 11px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.15s; }
     .lock-btn:hover { background: rgba(255,255,255,0.3); }
     .lock-btn.unlocked { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
-
-    .readonly-bar {
-      background: #fffbeb;
-      color: #92400e;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 7px;
-      display: flex; align-items: center; justify-content: center; gap: 5px;
-    }
+    .readonly-bar { background: #fffbeb; color: #92400e; text-align: center; font-size: 12px; font-weight: 600; padding: 7px; display: flex; align-items: center; justify-content: center; gap: 5px; }
     .readonly-bar.hidden { display: none; }
-
-    .sync-bar {
-      text-align: center; font-size: 12px; font-weight: 600;
-      padding: 6px;
-      background: #ebf8ff; color: #2b6cb0;
-    }
+    .sync-bar { text-align: center; font-size: 12px; font-weight: 600; padding: 6px; background: #ebf8ff; color: #2b6cb0; }
     .sync-bar.ok { background: #f0fff4; color: #276749; }
     .sync-bar.err { background: #fff5f5; color: #c53030; }
-
-    .month-nav {
-      display: flex; align-items: center; justify-content: space-between;
-      background: white; padding: 14px 20px;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky; top: 0; z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .month-nav button {
-      background: #f7fafc; border: 1px solid #e2e8f0;
-      border-radius: 8px; width: 36px; height: 36px;
-      font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .month-nav { display: flex; align-items: center; justify-content: space-between; background: white; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .month-nav button { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .month-nav button:hover { background: #edf2f7; }
     .month-title { font-size: 17px; font-weight: 700; }
-
-    .summary-area {
-      margin: 14px 14px 0;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-    .child-summary {
-      background: white; border-radius: 14px;
-      padding: 14px 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    }
-    .child-summary .name {
-      font-size: 13px; font-weight: 700; margin-bottom: 8px;
-      display: flex; align-items: center; gap: 6px;
-    }
+    .summary-area { margin: 14px 14px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .child-summary { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+    .child-summary .name { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     .dot-a { background: #4299e1; }
     .dot-b { background: #38a169; }
     .child-summary .count { font-size: 12px; color: #718096; margin-bottom: 4px; }
     .child-summary .amount { font-size: 20px; font-weight: 800; color: #38a169; }
-
-    .total-summary {
-      margin: 10px 14px 0; background: white;
-      border-radius: 14px; padding: 14px 18px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .total-summary { margin: 10px 14px 0; background: white; border-radius: 14px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; justify-content: space-between; align-items: center; }
     .total-summary .label { font-size: 13px; color: #718096; font-weight: 600; }
     .total-summary .value { font-size: 22px; font-weight: 800; color: #4c51bf; }
-
     .days-list { margin: 14px 14px 100px; }
     .week-label { font-size: 11px; color: #a0aec0; font-weight: 600; padding: 10px 2px 5px; }
-
-    .day-card {
-      background: white; border-radius: 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      overflow: hidden;
-    }
+    .day-card { background: white; border-radius: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
     .day-card.today { border: 2px solid #667eea; }
     .day-card.future { opacity: 0.6; }
-
-    .day-header {
-      display: flex; align-items: center;
-      padding: 10px 14px 8px;
-      border-bottom: 1px solid #f7fafc; gap: 10px;
-    }
+    .day-header { display: flex; align-items: center; padding: 10px 14px 8px; border-bottom: 1px solid #f7fafc; gap: 10px; }
     .day-num { font-size: 22px; font-weight: 800; line-height: 1; }
     .day-meta { flex: 1; }
     .day-weekday { font-size: 12px; font-weight: 700; }
     .day-weekday.tue { color: #4299e1; }
     .day-weekday.thu { color: #ed8936; }
-    .today-chip {
-      background: #667eea; color: white;
-      font-size: 10px; font-weight: 700;
-      border-radius: 4px; padding: 2px 6px;
-    }
+    .today-chip { background: #667eea; color: white; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; }
     .day-total { font-size: 13px; font-weight: 700; color: #38a169; white-space: nowrap; }
     .day-total.zero { color: #cbd5e0; }
-
     .child-rows { padding: 6px 14px 10px; display: flex; flex-direction: column; gap: 6px; }
     .child-row { display: flex; align-items: center; gap: 8px; }
-    .child-name-tag {
-      font-size: 12px; font-weight: 700;
-      display: flex; align-items: center; gap: 4px; min-width: 64px;
-    }
+    .child-name-tag { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; min-width: 64px; }
     .child-btns { display: flex; gap: 6px; flex: 1; }
-
-    .cbtn {
-      padding: 6px 12px; border-radius: 8px;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      border: 2px solid transparent; transition: all 0.12s;
-    }
+    .cbtn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; }
     .cbtn-attend-a { background: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; }
     .cbtn-attend-a.active { background: #3182ce; color: white; border-color: #3182ce; }
     .cbtn-attend-b { background: #f0fff4; color: #276749; border-color: #c6f6d5; }
     .cbtn-attend-b.active { background: #38a169; color: white; border-color: #38a169; }
     .cbtn-absent { background: #f7fafc; color: #a0aec0; border-color: #e2e8f0; }
     .cbtn-absent.active { background: #718096; color: white; border-color: #718096; }
-
     body.readonly .cbtn { cursor: not-allowed; opacity: 0.55; pointer-events: none; }
-
-    .child-amount {
-      font-size: 12px; font-weight: 700; min-width: 60px; text-align: right; color: #38a169;
-    }
+    body.readonly .float-btn { opacity: 0.4; pointer-events: none; }
+    .child-amount { font-size: 12px; font-weight: 700; min-width: 60px; text-align: right; color: #38a169; }
     .child-amount.zero { color: #cbd5e0; }
-
-    .float-btn {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white; border: none; border-radius: 50px;
-      padding: 14px 30px; font-size: 14px; font-weight: 700;
-      cursor: pointer; box-shadow: 0 4px 20px rgba(102,126,234,0.45);
-      white-space: nowrap; z-index: 100;
-    }
-
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-      display: flex; align-items: flex-end; justify-content: center;
-      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-    }
+    .float-btn { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 50px; padding: 14px 30px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(102,126,234,0.45); white-space: nowrap; z-index: 100; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: white; border-radius: 24px 24px 0 0;
-      padding: 24px 22px 40px; width: 100%; max-width: 480px;
-      transform: translateY(100%); transition: transform 0.25s ease;
-      max-height: 82vh; overflow-y: auto;
-    }
+    .modal { background: white; border-radius: 24px 24px 0 0; padding: 24px 22px 40px; width: 100%; max-width: 480px; transform: translateY(100%); transition: transform 0.25s ease; max-height: 82vh; overflow-y: auto; }
     .modal-overlay.open .modal { transform: translateY(0); }
     .modal h2 { font-size: 17px; font-weight: 800; margin-bottom: 18px; text-align: center; }
-
-    .pin-modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-    }
+    .pin-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .pin-modal-overlay.open { opacity: 1; pointer-events: all; }
-    .pin-modal {
-      background: white; border-radius: 20px;
-      padding: 30px 28px 24px; width: 300px;
-      transform: scale(0.9); transition: transform 0.2s;
-      text-align: center;
-    }
+    .pin-modal { background: white; border-radius: 20px; padding: 30px 28px 24px; width: 300px; transform: scale(0.9); transition: transform 0.2s; text-align: center; }
     .pin-modal-overlay.open .pin-modal { transform: scale(1); }
     .pin-modal h3 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
     .pin-modal p { font-size: 13px; color: #718096; margin-bottom: 20px; }
-
-    .pin-input {
-      width: 100%; padding: 13px 16px;
-      border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 22px; font-weight: 700; text-align: center;
-      letter-spacing: 8px; outline: none;
-      transition: border-color 0.15s;
-    }
+    .pin-input { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 22px; font-weight: 700; text-align: center; letter-spacing: 8px; outline: none; transition: border-color 0.15s; }
     .pin-input:focus { border-color: #667eea; }
     .pin-input.error { border-color: #e53e3e; animation: shake 0.3s; }
-
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
-    }
-
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
     .pin-error { color: #e53e3e; font-size: 12px; font-weight: 600; margin-top: 8px; min-height: 18px; }
-
-    .pin-submit {
-      width: 100%; margin-top: 14px; padding: 13px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white; border: none; border-radius: 12px;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-    }
-    .pin-cancel {
-      width: 100%; margin-top: 8px; padding: 11px;
-      background: #f7fafc; color: #718096;
-      border: none; border-radius: 12px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-    }
-
+    .pin-submit { width: 100%; margin-top: 14px; padding: 13px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .pin-cancel { width: 100%; margin-top: 8px; padding: 11px; background: #f7fafc; color: #718096; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .modal-child-block { background: #f7fafc; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
     .modal-child-header { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; justify-content: space-between; }
     .modal-child-total { font-size: 16px; font-weight: 800; color: #38a169; }
-    .modal-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 0; border-bottom: 1px solid #edf2f7; font-size: 13px;
-    }
+    .modal-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #edf2f7; font-size: 13px; }
     .modal-row .lbl { color: #718096; }
-    .modal-grand-total {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 0 0; font-size: 17px; font-weight: 800;
-      border-top: 2px solid #e2e8f0; margin-top: 4px;
-    }
+    .modal-grand-total { display: flex; justify-content: space-between; align-items: center; padding: 14px 0 0; font-size: 17px; font-weight: 800; border-top: 2px solid #e2e8f0; margin-top: 4px; }
     .modal-grand-total .val { color: #4c51bf; }
-    .modal-close {
-      width: 100%; margin-top: 18px; padding: 13px;
-      background: #f7fafc; border: none; border-radius: 12px;
-      font-size: 14px; font-weight: 700; cursor: pointer; color: #4a5568;
-    }
-
-    @media (min-width: 480px) {
-      .summary-area, .days-list, .total-summary { max-width: 480px; margin-left: auto; margin-right: auto; }
-    }
+    .modal-close { width: 100%; margin-top: 18px; padding: 13px; background: #f7fafc; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; color: #4a5568; }
+    @media (min-width: 480px) { .summary-area, .days-list, .total-summary { max-width: 480px; margin-left: auto; margin-right: auto; } }
   </style>
 </head>
 <body class="readonly">
-
 <div class="header">
   <h1>🚌 셔틀 픽업 관리</h1>
   <p>화요일 · 목요일 | 2명 16,000원 / 1명 11,000원</p>
   <button class="lock-btn" id="lockBtn">🔒 수정</button>
 </div>
-
 <div class="readonly-bar" id="readonlyBar">👀 보기 전용 모드 — 수정하려면 우측 상단 🔒 버튼을 눌러주세요</div>
-
 <div class="sync-bar" id="syncBar">🔄 데이터 연결 중...</div>
-
 <div class="month-nav">
   <button id="prevBtn">&#8249;</button>
   <span class="month-title" id="monthTitle"></span>
   <button id="nextBtn">&#8250;</button>
 </div>
-
 <div class="summary-area">
   <div class="child-summary">
     <div class="name"><span class="dot dot-a"></span>정지완</div>
@@ -317,16 +140,12 @@ html<!DOCTYPE html>
     <div class="amount" id="bAmount">0원</div>
   </div>
 </div>
-
 <div class="total-summary">
   <span class="label">👩‍🏫 선생님 총 수령액</span>
   <span class="value" id="grandTotal">0원</span>
 </div>
-
 <div class="days-list" id="daysList"></div>
-
 <button class="float-btn" id="calcBtn">📋 이번 달 정산 보기</button>
-
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2 id="modalTitle">정산 내역</h2>
@@ -334,7 +153,6 @@ html<!DOCTYPE html>
     <button class="modal-close" id="modalClose">닫기</button>
   </div>
 </div>
-
 <div class="pin-modal-overlay" id="pinOverlay">
   <div class="pin-modal">
     <h3>🔐 수정 모드</h3>
@@ -345,204 +163,76 @@ html<!DOCTYPE html>
     <button class="pin-cancel" id="pinCancel">취소</button>
   </div>
 </div>
-
 <script>
   const SECRET_PIN = "1234";
-  const PRICE_BOTH = 16000;
-  const PRICE_SOLO = 11000;
-  const SHARE_BOTH = 8000;
-
-  let data = {};
-  let viewYear, viewMonth;
-  const today = new Date();
-  let fbConnected = false;
-  let isUnlocked = false;
+  const PRICE_BOTH=16000, PRICE_SOLO=11000, SHARE_BOTH=8000;
+  let data={}, viewYear, viewMonth;
+  const today=new Date();
+  let fbConnected=false, isUnlocked=false;
 
   window.addEventListener('firebase-ready', () => {
-    if (!window._fbReady || !window._db) {
-      setSyncBar('err', '⚠️ Firebase 미설정 — 로컬 저장 중');
-      loadLocal(); return;
-    }
-    const r = window._ref(window._db, 'shuttleData2');
-    window._onValue(r, snap => {
-      data = snap.val() || {};
-      fbConnected = true;
-      setSyncBar('ok', '✅ 실시간 동기화 중');
-      render();
-    }, () => {
-      setSyncBar('err', '⚠️ Firebase 연결 실패 — 로컬 저장 중');
-      loadLocal();
-    });
+    if (!window._fbReady||!window._db){setSyncBar('err','⚠️ Firebase 미설정 — 로컬 저장 중');loadLocal();return;}
+    window._onValue(window._ref(window._db,'shuttleData2'), snap=>{
+      data=snap.val()||{}; fbConnected=true; setSyncBar('ok','✅ 실시간 동기화 중'); render();
+    }, ()=>{setSyncBar('err','⚠️ Firebase 연결 실패 — 로컬 저장 중');loadLocal();});
   });
 
-  function setSyncBar(type, msg) {
-    const el = document.getElementById('syncBar');
-    el.textContent = msg; el.className = 'sync-bar ' + type;
+  function setSyncBar(t,m){const e=document.getElementById('syncBar');e.textContent=m;e.className='sync-bar '+t;}
+  function loadLocal(){try{data=JSON.parse(localStorage.getItem('shuttleData2')||'{}');}catch(e){data={};}render();}
+  function saveDay(k){if(fbConnected&&window._db){window._set(window._ref(window._db,`shuttleData2/${k}`),data[k]||null);}else{localStorage.setItem('shuttleData2',JSON.stringify(data));}}
+
+  function setLockState(u){
+    isUnlocked=u; document.body.classList.toggle('readonly',!u);
+    document.getElementById('readonlyBar').classList.toggle('hidden',u);
+    const b=document.getElementById('lockBtn');
+    b.textContent=u?'🔓 수정 중':'🔒 수정'; b.classList.toggle('unlocked',u);
   }
-
-  function loadLocal() {
-    try { data = JSON.parse(localStorage.getItem('shuttleData2') || '{}'); } catch(e) { data = {}; }
-    render();
+  document.getElementById('lockBtn').addEventListener('click',()=>{if(isUnlocked)setLockState(false);else openPinModal();});
+  function openPinModal(){document.getElementById('pinInput').value='';document.getElementById('pinError').textContent='';document.getElementById('pinInput').classList.remove('error');document.getElementById('pinOverlay').classList.add('open');setTimeout(()=>document.getElementById('pinInput').focus(),200);}
+  function closePinModal(){document.getElementById('pinOverlay').classList.remove('open');}
+  function checkPin(){
+    const v=document.getElementById('pinInput').value;
+    if(v===SECRET_PIN){closePinModal();setLockState(true);}
+    else{document.getElementById('pinError').textContent='비밀번호가 틀렸어요';const i=document.getElementById('pinInput');i.classList.add('error');i.value='';setTimeout(()=>i.classList.remove('error'),400);i.focus();}
   }
+  document.getElementById('pinSubmit').addEventListener('click',checkPin);
+  document.getElementById('pinCancel').addEventListener('click',closePinModal);
+  document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
+  document.getElementById('pinOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('pinOverlay'))closePinModal();});
 
-  function saveDay(key) {
-    if (fbConnected && window._db) {
-      window._set(window._ref(window._db, `shuttleData2/${key}`), data[key] || null);
-    } else {
-      localStorage.setItem('shuttleData2', JSON.stringify(data));
-    }
-  }
+  function init(){loadLocal();viewYear=today.getFullYear();viewMonth=today.getMonth();render();}
+  function render(){renderTitle();renderDays();renderSummary();}
+  function renderTitle(){const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];document.getElementById('monthTitle').textContent=`${viewYear}년 ${mn[viewMonth]}`;}
+  function getDates(y,m){const r=[],d=new Date(y,m,1);while(d.getMonth()===m){if(d.getDay()===2||d.getDay()===4)r.push(new Date(d));d.setDate(d.getDate()+1);}return r;}
+  function dkey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function isToday(d){return d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()&&d.getDate()===today.getDate();}
+  function isFuture(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())>new Date(today.getFullYear(),today.getMonth(),today.getDate());}
+  function weekOf(d){return Math.ceil((d.getDate()+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);}
+  function calcAmounts(sa,sb){const aA=sa==='attend',bA=sb==='attend';if(aA&&bA)return{a:SHARE_BOTH,b:SHARE_BOTH,total:PRICE_BOTH};if(aA)return{a:PRICE_SOLO,b:0,total:PRICE_SOLO};if(bA)return{a:0,b:PRICE_SOLO,total:PRICE_SOLO};return{a:0,b:0,total:0};}
 
-  function setLockState(unlocked) {
-    isUnlocked = unlocked;
-    document.body.classList.toggle('readonly', !unlocked);
-    document.getElementById('readonlyBar').classList.toggle('hidden', unlocked);
-    const btn = document.getElementById('lockBtn');
-    if (unlocked) {
-      btn.textContent = '🔓 수정 중';
-      btn.classList.add('unlocked');
-    } else {
-      btn.textContent = '🔒 수정';
-      btn.classList.remove('unlocked');
-    }
-  }
-
-  document.getElementById('lockBtn').addEventListener('click', () => {
-    if (isUnlocked) { setLockState(false); } else { openPinModal(); }
-  });
-
-  function openPinModal() {
-    document.getElementById('pinInput').value = '';
-    document.getElementById('pinError').textContent = '';
-    document.getElementById('pinInput').classList.remove('error');
-    document.getElementById('pinOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('pinInput').focus(), 200);
-  }
-
-  function closePinModal() {
-    document.getElementById('pinOverlay').classList.remove('open');
-  }
-
-  function checkPin() {
-    const val = document.getElementById('pinInput').value;
-    if (val === SECRET_PIN) {
-      closePinModal();
-      setLockState(true);
-    } else {
-      document.getElementById('pinError').textContent = '비밀번호가 틀렸어요';
-      const inp = document.getElementById('pinInput');
-      inp.classList.add('error');
-      inp.value = '';
-      setTimeout(() => inp.classList.remove('error'), 400);
-      inp.focus();
-    }
-  }
-
-  document.getElementById('pinSubmit').addEventListener('click', checkPin);
-  document.getElementById('pinCancel').addEventListener('click', closePinModal);
-  document.getElementById('pinInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPin(); });
-  document.getElementById('pinOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('pinOverlay')) closePinModal();
-  });
-
-  function init() {
-    loadLocal();
-    viewYear = today.getFullYear();
-    viewMonth = today.getMonth();
-    render();
-  }
-
-  function render() { renderTitle(); renderDays(); renderSummary(); }
-
-  function renderTitle() {
-    const mn = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-    document.getElementById('monthTitle').textContent = `${viewYear}년 ${mn[viewMonth]}`;
-  }
-
-  function getDates(y, m) {
-    const result = [], d = new Date(y, m, 1);
-    while (d.getMonth() === m) {
-      if (d.getDay()===2 || d.getDay()===4) result.push(new Date(d));
-      d.setDate(d.getDate()+1);
-    }
-    return result;
-  }
-
-  function dkey(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function isToday(d) { return d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()&&d.getDate()===today.getDate(); }
-  function isFuture(d) { return new Date(d.getFullYear(),d.getMonth(),d.getDate())>new Date(today.getFullYear(),today.getMonth(),today.getDate()); }
-  function weekOf(d) { return Math.ceil((d.getDate()+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7); }
-
-  function calcAmounts(sa, sb) {
-    const aA = sa==='attend', bA = sb==='attend';
-    if (aA && bA)  return { a: SHARE_BOTH, b: SHARE_BOTH, total: PRICE_BOTH };
-    if (aA)        return { a: PRICE_SOLO, b: 0, total: PRICE_SOLO };
-    if (bA)        return { a: 0, b: PRICE_SOLO, total: PRICE_SOLO };
-    return { a:0, b:0, total:0 };
-  }
-
-  function renderDays() {
-    const list = document.getElementById('daysList');
-    const dates = getDates(viewYear, viewMonth);
-    if (!dates.length) { list.innerHTML='<div style="text-align:center;padding:40px;color:#a0aec0">이 달엔 화/목 날짜가 없어요</div>'; return; }
-
-    let html='', lastW=-1;
-    dates.forEach(d => {
-      const w=weekOf(d);
-      if (w!==lastW) { html+=`<div class="week-label">${w}주차</div>`; lastW=w; }
-      const key=dkey(d), day=data[key]||{};
-      const sa=day.a||null, sb=day.b||null;
-      const wc=d.getDay()===2?'tue':'thu', wn=d.getDay()===2?'화요일':'목요일';
-      const amt=calcAmounts(sa,sb);
-      html+=`
-      <div class="day-card ${isToday(d)?'today':''} ${isFuture(d)?'future':''}">
-        <div class="day-header">
-          <div class="day-num">${d.getDate()}</div>
-          <div class="day-meta"><div class="day-weekday ${wc}">${wn} ${isToday(d)?'<span class="today-chip">오늘</span>':''}</div></div>
-          <div class="day-total ${amt.total===0?'zero':''}">${amt.total>0?amt.total.toLocaleString()+'원':(sa||sb)?'':'미입력'}</div>
-        </div>
+  function renderDays(){
+    const list=document.getElementById('daysList'),dates=getDates(viewYear,viewMonth);
+    if(!dates.length){list.innerHTML='<div style="text-align:center;padding:40px;color:#a0aec0">이 달엔 화/목 날짜가 없어요</div>';return;}
+    let html='',lastW=-1;
+    dates.forEach(d=>{
+      const w=weekOf(d);if(w!==lastW){html+=`<div class="week-label">${w}주차</div>`;lastW=w;}
+      const key=dkey(d),day=data[key]||{},sa=day.a||null,sb=day.b||null;
+      const wc=d.getDay()===2?'tue':'thu',wn=d.getDay()===2?'화요일':'목요일',amt=calcAmounts(sa,sb);
+      html+=`<div class="day-card ${isToday(d)?'today':''} ${isFuture(d)?'future':''}">
+        <div class="day-header"><div class="day-num">${d.getDate()}</div><div class="day-meta"><div class="day-weekday ${wc}">${wn} ${isToday(d)?'<span class="today-chip">오늘</span>':''}</div></div><div class="day-total ${amt.total===0?'zero':''}">${amt.total>0?amt.total.toLocaleString()+'원':(sa||sb)?'':'미입력'}</div></div>
         <div class="child-rows">
-          <div class="child-row">
-            <div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#4299e1"></span>정지완</div>
-            <div class="child-btns">
-              <button class="cbtn cbtn-attend-a ${sa==='attend'?'active':''}" onclick="setChild('${key}','a','attend')">출석</button>
-              <button class="cbtn cbtn-absent ${sa==='absent'?'active':''}" onclick="setChild('${key}','a','absent')">불참</button>
-            </div>
-            <div class="child-amount ${amt.a===0?'zero':''}">${sa==='attend'?amt.a.toLocaleString()+'원':sa==='absent'?'불참':'?'}</div>
-          </div>
-          <div class="child-row">
-            <div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#38a169"></span>유려한</div>
-            <div class="child-btns">
-              <button class="cbtn cbtn-attend-b ${sb==='attend'?'active':''}" onclick="setChild('${key}','b','attend')">출석</button>
-              <button class="cbtn cbtn-absent ${sb==='absent'?'active':''}" onclick="setChild('${key}','b','absent')">불참</button>
-            </div>
-            <div class="child-amount ${amt.b===0?'zero':''}">${sb==='attend'?amt.b.toLocaleString()+'원':sb==='absent'?'불참':'?'}</div>
-          </div>
-        </div>
-      </div>`;
+          <div class="child-row"><div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#4299e1"></span>정지완</div><div class="child-btns"><button class="cbtn cbtn-attend-a ${sa==='attend'?'active':''}" onclick="setChild('${key}','a','attend')">출석</button><button class="cbtn cbtn-absent ${sa==='absent'?'active':''}" onclick="setChild('${key}','a','absent')">불참</button></div><div class="child-amount ${amt.a===0?'zero':''}">${sa==='attend'?amt.a.toLocaleString()+'원':sa==='absent'?'불참':'?'}</div></div>
+          <div class="child-row"><div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#38a169"></span>유려한</div><div class="child-btns"><button class="cbtn cbtn-attend-b ${sb==='attend'?'active':''}" onclick="setChild('${key}','b','attend')">출석</button><button class="cbtn cbtn-absent ${sb==='absent'?'active':''}" onclick="setChild('${key}','b','absent')">불참</button></div><div class="child-amount ${amt.b===0?'zero':''}">${sb==='attend'?amt.b.toLocaleString()+'원':sb==='absent'?'불참':'?'}</div></div>
+        </div></div>`;
     });
     list.innerHTML=html;
   }
 
-  function setChild(key, child, val) {
-    if (!isUnlocked) return;
-    if (!data[key]) data[key]={};
-    data[key][child] = data[key][child]===val ? null : val;
-    saveDay(key);
-    if (!fbConnected) { renderDays(); renderSummary(); }
-  }
+  function setChild(key,child,val){if(!isUnlocked)return;if(!data[key])data[key]={};data[key][child]=data[key][child]===val?null:val;saveDay(key);if(!fbConnected){renderDays();renderSummary();}}
 
-  function renderSummary() {
-    const dates=getDates(viewYear,viewMonth);
-    let aT=0,bT=0,aC=0,bC=0;
-    dates.forEach(d=>{
-      const day=data[dkey(d)]||{}, amt=calcAmounts(day.a||null,day.b||null);
-      aT+=amt.a; bT+=amt.b;
-      if(day.a==='attend') aC++;
-      if(day.b==='attend') bC++;
-    });
+  function renderSummary(){
+    const dates=getDates(viewYear,viewMonth);let aT=0,bT=0,aC=0,bC=0;
+    dates.forEach(d=>{const day=data[dkey(d)]||{},amt=calcAmounts(day.a||null,day.b||null);aT+=amt.a;bT+=amt.b;if(day.a==='attend')aC++;if(day.b==='attend')bC++;});
     document.getElementById('aAmount').textContent=aT.toLocaleString()+'원';
     document.getElementById('bAmount').textContent=bT.toLocaleString()+'원';
     document.getElementById('aCount').textContent=`출석 ${aC}일`;
@@ -550,41 +240,31 @@ html<!DOCTYPE html>
     document.getElementById('grandTotal').textContent=(aT+bT).toLocaleString()+'원';
   }
 
-  document.getElementById('calcBtn').addEventListener('click', () => {
-    const dates=getDates(viewYear,viewMonth);
-    const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('calcBtn').addEventListener('click',()=>{
+    const dates=getDates(viewYear,viewMonth),mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
     let aT=0,bT=0,aR='',bR='',pending=0;
     dates.forEach(d=>{
-      const key=dkey(d), day=data[key]||{};
-      const sa=day.a||null, sb=day.b||null;
-      const wn=d.getDay()===2?'화':'목', lbl=`${d.getDate()}일(${wn})`;
-      const amt=calcAmounts(sa,sb);
-      if(sa===null||sb===null) pending++;
-      if(sa==='attend'){ aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#3182ce">${amt.a.toLocaleString()}원</span></div>`; aT+=amt.a; }
-      else if(sa==='absent'){ aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`; }
-      if(sb==='attend'){ bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#38a169">${amt.b.toLocaleString()}원</span></div>`; bT+=amt.b; }
-      else if(sb==='absent'){ bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`; }
+      const key=dkey(d),day=data[key]||{},sa=day.a||null,sb=day.b||null;
+      const wn=d.getDay()===2?'화':'목',lbl=`${d.getDate()}일(${wn})`,amt=calcAmounts(sa,sb);
+      if(sa===null||sb===null)pending++;
+      if(sa==='attend'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#3182ce">${amt.a.toLocaleString()}원</span></div>`;aT+=amt.a;}
+      else if(sa==='absent'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
+      if(sb==='attend'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#38a169">${amt.b.toLocaleString()}원</span></div>`;bT+=amt.b;}
+      else if(sb==='absent'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
     });
     document.getElementById('modalTitle').textContent=`${viewYear}년 ${mn[viewMonth]} 정산`;
     document.getElementById('modalBody').innerHTML=`
       ${pending>0?`<div style="background:#fff5f5;color:#c53030;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:14px">⚠️ 미입력 날짜 ${pending}일</div>`:''}
-      <div class="modal-child-block">
-        <div class="modal-child-header"><span>🔵 정지완</span><span class="modal-child-total">${aT.toLocaleString()}원</span></div>
-        ${aR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}
-      </div>
-      <div class="modal-child-block">
-        <div class="modal-child-header"><span>🟢 유려한</span><span class="modal-child-total">${bT.toLocaleString()}원</span></div>
-        ${bR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}
-      </div>
-      <div class="modal-grand-total"><span>👩‍🏫 선생님 총 수령액</span><span class="val">${(aT+bT).toLocaleString()}원</span></div>
-    `;
+      <div class="modal-child-block"><div class="modal-child-header"><span>🔵 정지완</span><span class="modal-child-total">${aT.toLocaleString()}원</span></div>${aR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
+      <div class="modal-child-block"><div class="modal-child-header"><span>🟢 유려한</span><span class="modal-child-total">${bT.toLocaleString()}원</span></div>${bR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
+      <div class="modal-grand-total"><span>👩‍🏫 선생님 총 수령액</span><span class="val">${(aT+bT).toLocaleString()}원</span></div>`;
     document.getElementById('modalOverlay').classList.add('open');
   });
 
-  document.getElementById('modalClose').addEventListener('click', ()=>document.getElementById('modalOverlay').classList.remove('open'));
-  document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open'); });
-  document.getElementById('prevBtn').addEventListener('click', ()=>{ if(--viewMonth<0){viewMonth=11;viewYear--;} render(); });
-  document.getElementById('nextBtn').addEventListener('click', ()=>{ if(++viewMonth>11){viewMonth=0;viewYear++;} render(); });
+  document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalOverlay').classList.remove('open'));
+  document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');});
+  document.getElementById('prevBtn').addEventListener('click',()=>{if(--viewMonth<0){viewMonth=11;viewYear--;}render();});
+  document.getElementById('nextBtn').addEventListener('click',()=>{if(++viewMonth>11){viewMonth=0;viewYear++;}render();});
 
   init();
 </script>
