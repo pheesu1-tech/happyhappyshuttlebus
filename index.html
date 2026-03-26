@@ -4,25 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>셔틀 픽업 관리</title>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    // ========================================================
-    // 🔧 Firebase 설정 붙여넣기
-    // ========================================================
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCRehoBmgqhtgKf_ypyastE7Lh3U1iKAus",
+      authDomain: "happyhappyshuttle.firebaseapp.com",
+      databaseURL: "https://happyhappyshuttle-default-rtdb.firebaseio.com",
+      projectId: "happyhappyshuttle",
+      storageBucket: "happyhappyshuttle.firebasestorage.app",
+      messagingSenderId: "504947163720",
+      appId: "1:504947163720:web:bd3e705dc7a404440d4e7d"
     };
-    // ========================================================
-
     try {
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
@@ -34,7 +27,6 @@
       window.dispatchEvent(new Event('firebase-ready'));
     }
   </script>
-
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; background: #f0f4f8; color: #2d3748; min-height: 100vh; }
@@ -104,7 +96,7 @@
     .pin-input { width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 22px; font-weight: 700; text-align: center; letter-spacing: 8px; outline: none; transition: border-color 0.15s; }
     .pin-input:focus { border-color: #667eea; }
     .pin-input.error { border-color: #e53e3e; animation: shake 0.3s; }
-    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
     .pin-error { color: #e53e3e; font-size: 12px; font-weight: 600; margin-top: 8px; min-height: 18px; }
     .pin-submit { width: 100%; margin-top: 14px; padding: 13px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
     .pin-cancel { width: 100%; margin-top: 8px; padding: 11px; background: #f7fafc; color: #718096; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -120,7 +112,6 @@
   </style>
 </head>
 <body class="readonly">
-
 <div class="header">
   <h1>🚌 셔틀 픽업 관리</h1>
   <p>화요일 · 목요일 | 2명 16,000원 / 1명 11,000원</p>
@@ -151,7 +142,6 @@
 </div>
 <div class="days-list" id="daysList"></div>
 <button class="float-btn" id="calcBtn">📋 이번 달 정산 보기</button>
-
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2 id="modalTitle">정산 내역</h2>
@@ -159,7 +149,6 @@
     <button class="modal-close" id="modalClose">닫기</button>
   </div>
 </div>
-
 <div class="pin-modal-overlay" id="pinOverlay">
   <div class="pin-modal">
     <h3>🔐 수정 모드</h3>
@@ -170,28 +159,23 @@
     <button class="pin-cancel" id="pinCancel">취소</button>
   </div>
 </div>
-
 <script>
-  // ====================================================
-  // 🔑 비밀번호 — 원하는 숫자로 바꿔주세요
   const SECRET_PIN = "1234";
-  // ====================================================
-
   const PRICE_BOTH=16000, PRICE_SOLO=11000, SHARE_BOTH=8000;
   let data={}, viewYear, viewMonth;
   const today=new Date();
   let fbConnected=false, isUnlocked=false;
 
   window.addEventListener('firebase-ready', () => {
-    if (!window._fbReady||!window._db) { setSyncBar('err','⚠️ Firebase 미설정 — 로컬 저장 중'); loadLocal(); return; }
-    window._onValue(window._ref(window._db,'shuttleData2'), snap => {
+    if (!window._fbReady||!window._db){setSyncBar('err','⚠️ Firebase 미설정 — 로컬 저장 중');loadLocal();return;}
+    window._onValue(window._ref(window._db,'shuttleData2'), snap=>{
       data=snap.val()||{}; fbConnected=true; setSyncBar('ok','✅ 실시간 동기화 중'); render();
-    }, () => { setSyncBar('err','⚠️ Firebase 연결 실패'); loadLocal(); });
+    }, ()=>{setSyncBar('err','⚠️ Firebase 연결 실패');loadLocal();});
   });
 
-  function setSyncBar(t,m){ const e=document.getElementById('syncBar'); e.textContent=m; e.className='sync-bar '+t; }
-  function loadLocal(){ try{data=JSON.parse(localStorage.getItem('shuttleData2')||'{}');}catch(e){data={};} render(); }
-  function saveDay(k){ if(fbConnected&&window._db){window._set(window._ref(window._db,`shuttleData2/${k}`),data[k]||null);}else{localStorage.setItem('shuttleData2',JSON.stringify(data));} }
+  function setSyncBar(t,m){const e=document.getElementById('syncBar');e.textContent=m;e.className='sync-bar '+t;}
+  function loadLocal(){try{data=JSON.parse(localStorage.getItem('shuttleData2')||'{}');}catch(e){data={};}render();}
+  function saveDay(k){if(fbConnected&&window._db){window._set(window._ref(window._db,`shuttleData2/${k}`),data[k]||null);}else{localStorage.setItem('shuttleData2',JSON.stringify(data));}}
 
   function setLockState(u){
     isUnlocked=u; document.body.classList.toggle('readonly',!u);
@@ -199,35 +183,35 @@
     const b=document.getElementById('lockBtn');
     b.textContent=u?'🔓 수정 중':'🔒 수정'; b.classList.toggle('unlocked',u);
   }
-  document.getElementById('lockBtn').addEventListener('click',()=>{ if(isUnlocked)setLockState(false); else openPinModal(); });
-  function openPinModal(){ document.getElementById('pinInput').value=''; document.getElementById('pinError').textContent=''; document.getElementById('pinInput').classList.remove('error'); document.getElementById('pinOverlay').classList.add('open'); setTimeout(()=>document.getElementById('pinInput').focus(),200); }
-  function closePinModal(){ document.getElementById('pinOverlay').classList.remove('open'); }
+  document.getElementById('lockBtn').addEventListener('click',()=>{if(isUnlocked)setLockState(false);else openPinModal();});
+  function openPinModal(){document.getElementById('pinInput').value='';document.getElementById('pinError').textContent='';document.getElementById('pinInput').classList.remove('error');document.getElementById('pinOverlay').classList.add('open');setTimeout(()=>document.getElementById('pinInput').focus(),200);}
+  function closePinModal(){document.getElementById('pinOverlay').classList.remove('open');}
   function checkPin(){
     const v=document.getElementById('pinInput').value;
-    if(v===SECRET_PIN){ closePinModal(); setLockState(true); }
-    else{ document.getElementById('pinError').textContent='비밀번호가 틀렸어요'; const i=document.getElementById('pinInput'); i.classList.add('error'); i.value=''; setTimeout(()=>i.classList.remove('error'),400); i.focus(); }
+    if(v===SECRET_PIN){closePinModal();setLockState(true);}
+    else{document.getElementById('pinError').textContent='비밀번호가 틀렸어요';const i=document.getElementById('pinInput');i.classList.add('error');i.value='';setTimeout(()=>i.classList.remove('error'),400);i.focus();}
   }
   document.getElementById('pinSubmit').addEventListener('click',checkPin);
   document.getElementById('pinCancel').addEventListener('click',closePinModal);
   document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
   document.getElementById('pinOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('pinOverlay'))closePinModal();});
 
-  function init(){ loadLocal(); viewYear=today.getFullYear(); viewMonth=today.getMonth(); render(); }
-  function render(){ renderTitle(); renderDays(); renderSummary(); }
-  function renderTitle(){ const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']; document.getElementById('monthTitle').textContent=`${viewYear}년 ${mn[viewMonth]}`; }
-  function getDates(y,m){ const r=[],d=new Date(y,m,1); while(d.getMonth()===m){if(d.getDay()===2||d.getDay()===4)r.push(new Date(d));d.setDate(d.getDate()+1);} return r; }
-  function dkey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-  function isToday(d){ return d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()&&d.getDate()===today.getDate(); }
-  function isFuture(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate())>new Date(today.getFullYear(),today.getMonth(),today.getDate()); }
-  function weekOf(d){ return Math.ceil((d.getDate()+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7); }
-  function calcAmounts(sa,sb){ const aA=sa==='attend',bA=sb==='attend'; if(aA&&bA)return{a:SHARE_BOTH,b:SHARE_BOTH,total:PRICE_BOTH}; if(aA)return{a:PRICE_SOLO,b:0,total:PRICE_SOLO}; if(bA)return{a:0,b:PRICE_SOLO,total:PRICE_SOLO}; return{a:0,b:0,total:0}; }
+  function init(){loadLocal();viewYear=today.getFullYear();viewMonth=today.getMonth();render();}
+  function render(){renderTitle();renderDays();renderSummary();}
+  function renderTitle(){const mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];document.getElementById('monthTitle').textContent=`${viewYear}년 ${mn[viewMonth]}`;}
+  function getDates(y,m){const r=[],d=new Date(y,m,1);while(d.getMonth()===m){if(d.getDay()===2||d.getDay()===4)r.push(new Date(d));d.setDate(d.getDate()+1);}return r;}
+  function dkey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function isToday(d){return d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()&&d.getDate()===today.getDate();}
+  function isFuture(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())>new Date(today.getFullYear(),today.getMonth(),today.getDate());}
+  function weekOf(d){return Math.ceil((d.getDate()+new Date(d.getFullYear(),d.getMonth(),1).getDay())/7);}
+  function calcAmounts(sa,sb){const aA=sa==='attend',bA=sb==='attend';if(aA&&bA)return{a:SHARE_BOTH,b:SHARE_BOTH,total:PRICE_BOTH};if(aA)return{a:PRICE_SOLO,b:0,total:PRICE_SOLO};if(bA)return{a:0,b:PRICE_SOLO,total:PRICE_SOLO};return{a:0,b:0,total:0};}
 
   function renderDays(){
-    const list=document.getElementById('daysList'), dates=getDates(viewYear,viewMonth);
+    const list=document.getElementById('daysList'),dates=getDates(viewYear,viewMonth);
     if(!dates.length){list.innerHTML='<div style="text-align:center;padding:40px;color:#a0aec0">이 달엔 화/목 날짜가 없어요</div>';return;}
     let html='',lastW=-1;
     dates.forEach(d=>{
-      const w=weekOf(d); if(w!==lastW){html+=`<div class="week-label">${w}주차</div>`;lastW=w;}
+      const w=weekOf(d);if(w!==lastW){html+=`<div class="week-label">${w}주차</div>`;lastW=w;}
       const key=dkey(d),day=data[key]||{},sa=day.a||null,sb=day.b||null;
       const wc=d.getDay()===2?'tue':'thu',wn=d.getDay()===2?'화요일':'목요일',amt=calcAmounts(sa,sb);
       html+=`<div class="day-card ${isToday(d)?'today':''} ${isFuture(d)?'future':''}">
@@ -240,11 +224,11 @@
     list.innerHTML=html;
   }
 
-  function setChild(key,child,val){ if(!isUnlocked)return; if(!data[key])data[key]={}; data[key][child]=data[key][child]===val?null:val; saveDay(key); if(!fbConnected){renderDays();renderSummary();} }
+  function setChild(key,child,val){if(!isUnlocked)return;if(!data[key])data[key]={};data[key][child]=data[key][child]===val?null:val;saveDay(key);if(!fbConnected){renderDays();renderSummary();}}
 
   function renderSummary(){
-    const dates=getDates(viewYear,viewMonth); let aT=0,bT=0,aC=0,bC=0;
-    dates.forEach(d=>{ const day=data[dkey(d)]||{},amt=calcAmounts(day.a||null,day.b||null); aT+=amt.a;bT+=amt.b; if(day.a==='attend')aC++;if(day.b==='attend')bC++; });
+    const dates=getDates(viewYear,viewMonth);let aT=0,bT=0,aC=0,bC=0;
+    dates.forEach(d=>{const day=data[dkey(d)]||{},amt=calcAmounts(day.a||null,day.b||null);aT+=amt.a;bT+=amt.b;if(day.a==='attend')aC++;if(day.b==='attend')bC++;});
     document.getElementById('aAmount').textContent=aT.toLocaleString()+'원';
     document.getElementById('bAmount').textContent=bT.toLocaleString()+'원';
     document.getElementById('aCount').textContent=`출석 ${aC}일`;
@@ -255,13 +239,18 @@
   document.getElementById('calcBtn').addEventListener('click',()=>{
     const dates=getDates(viewYear,viewMonth),mn=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
     let aT=0,bT=0,aR='',bR='',pending=0;
-    dates.forEach(d=>{ const key=dkey(d),day=data[key]||{},sa=day.a||null,sb=day.b||null,wn=d.getDay()===2?'화':'목',lbl=`${d.getDate()}일(${wn})`,amt=calcAmounts(sa,sb);
+    dates.forEach(d=>{
+      const key=dkey(d),day=data[key]||{},sa=day.a||null,sb=day.b||null;
+      const wn=d.getDay()===2?'화':'목',lbl=`${d.getDate()}일(${wn})`,amt=calcAmounts(sa,sb);
       if(sa===null||sb===null)pending++;
-      if(sa==='attend'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#3182ce">${amt.a.toLocaleString()}원</span></div>`;aT+=amt.a;}else if(sa==='absent'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
-      if(sb==='attend'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#d53f8c">${amt.b.toLocaleString()}원</span></div>`;bT+=amt.b;}else if(sb==='absent'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
+      if(sa==='attend'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#3182ce">${amt.a.toLocaleString()}원</span></div>`;aT+=amt.a;}
+      else if(sa==='absent'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
+      if(sb==='attend'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#d53f8c">${amt.b.toLocaleString()}원</span></div>`;bT+=amt.b;}
+      else if(sb==='absent'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
     });
     document.getElementById('modalTitle').textContent=`${viewYear}년 ${mn[viewMonth]} 정산`;
-    document.getElementById('modalBody').innerHTML=`${pending>0?`<div style="background:#fff5f5;color:#c53030;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:14px">⚠️ 미입력 날짜 ${pending}일</div>`:''}
+    document.getElementById('modalBody').innerHTML=`
+      ${pending>0?`<div style="background:#fff5f5;color:#c53030;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:14px">⚠️ 미입력 날짜 ${pending}일</div>`:''}
       <div class="modal-child-block"><div class="modal-child-header"><span>🔵 정지완</span><span class="modal-child-total">${aT.toLocaleString()}원</span></div>${aR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
       <div class="modal-child-block"><div class="modal-child-header"><span>🩷 유려한</span><span class="modal-child-total">${bT.toLocaleString()}원</span></div>${bR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
       <div class="modal-grand-total"><span>👩‍🏫 선생님 총 수령액</span><span class="val">${(aT+bT).toLocaleString()}원</span></div>`;
