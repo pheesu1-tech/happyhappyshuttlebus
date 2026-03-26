@@ -19,11 +19,11 @@
     try {
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
-      window._db = db; window._ref = ref; window._set = set; window._onValue = onValue;
-      window._fbReady = true;
+      window._db=db; window._ref=ref; window._set=set; window._onValue=onValue;
+      window._fbReady=true;
       window.dispatchEvent(new Event('firebase-ready'));
     } catch(e) {
-      window._fbReady = false;
+      window._fbReady=false;
       window.dispatchEvent(new Event('firebase-ready'));
     }
   </script>
@@ -49,7 +49,8 @@
     .child-summary { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
     .child-summary .name { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot-a { background: #4299e1; } .dot-b { background: #d53f8c; }
+    .dot-a { background: #4299e1; }
+    .dot-b { background: #38a169; }
     .child-summary .count { font-size: 12px; color: #718096; margin-bottom: 4px; }
     .child-summary .amount { font-size: 20px; font-weight: 800; color: #38a169; }
     .total-summary { margin: 10px 14px 0; background: white; border-radius: 14px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); display: flex; justify-content: space-between; align-items: center; }
@@ -58,11 +59,14 @@
     .days-list { margin: 14px 14px 100px; }
     .week-label { font-size: 11px; color: #a0aec0; font-weight: 600; padding: 10px 2px 5px; }
     .day-card { background: white; border-radius: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
-    .day-card.today { border: 2px solid #667eea; } .day-card.future { opacity: 0.6; }
+    .day-card.today { border: 2px solid #667eea; }
+    .day-card.future { opacity: 0.6; }
     .day-header { display: flex; align-items: center; padding: 10px 14px 8px; border-bottom: 1px solid #f7fafc; gap: 10px; }
-    .day-num { font-size: 22px; font-weight: 800; line-height: 1; } .day-meta { flex: 1; }
+    .day-num { font-size: 22px; font-weight: 800; line-height: 1; }
+    .day-meta { flex: 1; }
     .day-weekday { font-size: 12px; font-weight: 700; }
-    .day-weekday.tue { color: #4299e1; } .day-weekday.thu { color: #ed8936; }
+    .day-weekday.tue { color: #4299e1; }
+    .day-weekday.thu { color: #ed8936; }
     .today-chip { background: #667eea; color: white; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px; }
     .day-total { font-size: 13px; font-weight: 700; color: #38a169; white-space: nowrap; }
     .day-total.zero { color: #cbd5e0; }
@@ -73,8 +77,8 @@
     .cbtn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; }
     .cbtn-attend-a { background: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; }
     .cbtn-attend-a.active { background: #3182ce; color: white; border-color: #3182ce; }
-    .cbtn-attend-b { background: #fff5f7; color: #97266d; border-color: #fed7e2; }
-    .cbtn-attend-b.active { background: #d53f8c; color: white; border-color: #d53f8c; }
+    .cbtn-attend-b { background: #f0fff4; color: #276749; border-color: #c6f6d5; }
+    .cbtn-attend-b.active { background: #38a169; color: white; border-color: #38a169; }
     .cbtn-absent { background: #f7fafc; color: #a0aec0; border-color: #e2e8f0; }
     .cbtn-absent.active { background: #718096; color: white; border-color: #718096; }
     body.readonly .cbtn { cursor: not-allowed; opacity: 0.55; pointer-events: none; }
@@ -170,7 +174,7 @@
     if (!window._fbReady||!window._db){setSyncBar('err','⚠️ Firebase 미설정 — 로컬 저장 중');loadLocal();return;}
     window._onValue(window._ref(window._db,'shuttleData2'), snap=>{
       data=snap.val()||{}; fbConnected=true; setSyncBar('ok','✅ 실시간 동기화 중'); render();
-    }, ()=>{setSyncBar('err','⚠️ Firebase 연결 실패');loadLocal();});
+    }, ()=>{setSyncBar('err','⚠️ Firebase 연결 실패 — 로컬 저장 중');loadLocal();});
   });
 
   function setSyncBar(t,m){const e=document.getElementById('syncBar');e.textContent=m;e.className='sync-bar '+t;}
@@ -218,7 +222,7 @@
         <div class="day-header"><div class="day-num">${d.getDate()}</div><div class="day-meta"><div class="day-weekday ${wc}">${wn} ${isToday(d)?'<span class="today-chip">오늘</span>':''}</div></div><div class="day-total ${amt.total===0?'zero':''}">${amt.total>0?amt.total.toLocaleString()+'원':(sa||sb)?'':'미입력'}</div></div>
         <div class="child-rows">
           <div class="child-row"><div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#4299e1"></span>정지완</div><div class="child-btns"><button class="cbtn cbtn-attend-a ${sa==='attend'?'active':''}" onclick="setChild('${key}','a','attend')">출석</button><button class="cbtn cbtn-absent ${sa==='absent'?'active':''}" onclick="setChild('${key}','a','absent')">불참</button></div><div class="child-amount ${amt.a===0?'zero':''}">${sa==='attend'?amt.a.toLocaleString()+'원':sa==='absent'?'불참':'?'}</div></div>
-          <div class="child-row"><div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#d53f8c"></span>유려한</div><div class="child-btns"><button class="cbtn cbtn-attend-b ${sb==='attend'?'active':''}" onclick="setChild('${key}','b','attend')">출석</button><button class="cbtn cbtn-absent ${sb==='absent'?'active':''}" onclick="setChild('${key}','b','absent')">불참</button></div><div class="child-amount ${amt.b===0?'zero':''}">${sb==='attend'?amt.b.toLocaleString()+'원':sb==='absent'?'불참':'?'}</div></div>
+          <div class="child-row"><div class="child-name-tag"><span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:#38a169"></span>유려한</div><div class="child-btns"><button class="cbtn cbtn-attend-b ${sb==='attend'?'active':''}" onclick="setChild('${key}','b','attend')">출석</button><button class="cbtn cbtn-absent ${sb==='absent'?'active':''}" onclick="setChild('${key}','b','absent')">불참</button></div><div class="child-amount ${amt.b===0?'zero':''}">${sb==='attend'?amt.b.toLocaleString()+'원':sb==='absent'?'불참':'?'}</div></div>
         </div></div>`;
     });
     list.innerHTML=html;
@@ -245,14 +249,14 @@
       if(sa===null||sb===null)pending++;
       if(sa==='attend'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#3182ce">${amt.a.toLocaleString()}원</span></div>`;aT+=amt.a;}
       else if(sa==='absent'){aR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
-      if(sb==='attend'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#d53f8c">${amt.b.toLocaleString()}원</span></div>`;bT+=amt.b;}
+      if(sb==='attend'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="font-weight:700;color:#38a169">${amt.b.toLocaleString()}원</span></div>`;bT+=amt.b;}
       else if(sb==='absent'){bR+=`<div class="modal-row"><span class="lbl">${lbl}</span><span style="color:#a0aec0">불참</span></div>`;}
     });
     document.getElementById('modalTitle').textContent=`${viewYear}년 ${mn[viewMonth]} 정산`;
     document.getElementById('modalBody').innerHTML=`
       ${pending>0?`<div style="background:#fff5f5;color:#c53030;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:14px">⚠️ 미입력 날짜 ${pending}일</div>`:''}
       <div class="modal-child-block"><div class="modal-child-header"><span>🔵 정지완</span><span class="modal-child-total">${aT.toLocaleString()}원</span></div>${aR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
-      <div class="modal-child-block"><div class="modal-child-header"><span>🩷 유려한</span><span class="modal-child-total">${bT.toLocaleString()}원</span></div>${bR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
+      <div class="modal-child-block"><div class="modal-child-header"><span>🟢 유려한</span><span class="modal-child-total">${bT.toLocaleString()}원</span></div>${bR||'<div style="font-size:12px;color:#a0aec0;padding:4px 0">기록 없음</div>'}</div>
       <div class="modal-grand-total"><span>👩‍🏫 선생님 총 수령액</span><span class="val">${(aT+bT).toLocaleString()}원</span></div>`;
     document.getElementById('modalOverlay').classList.add('open');
   });
