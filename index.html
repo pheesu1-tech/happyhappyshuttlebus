@@ -33,6 +33,9 @@
     .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 22px 20px 18px; text-align: center; position: relative; }
     .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
     .header p { font-size: 12px; opacity: 0.85; }
+    .kid-photo { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.8); object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .kid-photo-left { left: 14px; }
+    .kid-photo-right { right: 70px; }
     .lock-btn { position: absolute; top: 18px; right: 16px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; padding: 7px 11px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.15s; }
     .lock-btn:hover { background: rgba(255,255,255,0.3); }
     .lock-btn.unlocked { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
@@ -116,9 +119,12 @@
   </style>
 </head>
 <body class="readonly">
+
 <div class="header">
+  <img src="jiwan.jpg" class="kid-photo kid-photo-left" alt="정지완" onerror="this.style.display='none'">
   <h1>🚌 셔틀 픽업 관리</h1>
   <p>화요일 · 목요일 | 2명 16,000원 / 1명 11,000원</p>
+  <img src="ryohan.jpg" class="kid-photo kid-photo-right" alt="유려한" onerror="this.style.display='none'">
   <button class="lock-btn" id="lockBtn">🔒 수정</button>
 </div>
 <div class="readonly-bar" id="readonlyBar">👀 보기 전용 모드 — 수정하려면 우측 상단 🔒 버튼을 눌러주세요</div>
@@ -163,6 +169,7 @@
     <button class="pin-cancel" id="pinCancel">취소</button>
   </div>
 </div>
+
 <script>
   const SECRET_PIN = "1234";
   const PRICE_BOTH=16000, PRICE_SOLO=11000, SHARE_BOTH=8000;
